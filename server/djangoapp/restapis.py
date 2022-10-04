@@ -13,8 +13,9 @@ def get_request(url, **kwargs):
     print("GET from {} ".format(url))
     try:
         # Call get method of requests library with URL and parameters
+
         response = requests.get(url, headers={'Content-Type': 'application/json'},
-                                    params=kwargs)
+                                        params=kwargs)
     except:
         # If any error occurs
         print("Network exception occurred")
@@ -93,13 +94,36 @@ def get_dealer_reviews_from_cf(url, dealer_id):
                 name=review_doc.get("name", ""),
                 purchase=review_doc.get("purchase", ""),
                 purchase_date=review_doc.get("purchase_date", ""),
-                review=review_doc.get("review", ""))
+                review=review_doc.get("review", ""),
+                sentiment=analyze_review_sentiments(review_doc.get("review", "")))
             results.append(review_obj)
 
     return results
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
-# def analyze_review_sentiments(text):
+def analyze_review_sentiments(text):
+    api_key="vZPwF86ypOssyBG9HQ_LIUXmJh8z4ZQFJKQYnWvDImF9"
+    url="https://api.eu-gb.natural-language-understanding.watson.cloud.ibm.com/instances/bbc781ab-bc8e-4075-a5a4-92831706a7aa/v1/analyze"
+    params = dict()
+    params["version"] = "2022-04-07"
+    params["text"] = text
+    params["features"] = "keywords,entities"
+    params["entities.sentiment"] = "true"
+    params["keywords.sentiment"] = "true"
+    print(params)
+    print("GET from {} ".format(url))
+    try:
+        response = requests.get(url, headers={'Content-Type': 'application/json'},
+                                    params=params,
+                                    auth=HTTPBasicAuth('apikey', api_key))
+    except:
+        # If any error occurs
+        print("Network exception occurred")
+    status_code = response.status_code
+    print("With status {} ".format(status_code))
+    json_data = json.loads(response.text)
+    return json_data["keywords"][0]["sentiment"]["label"]
+ 
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
 
