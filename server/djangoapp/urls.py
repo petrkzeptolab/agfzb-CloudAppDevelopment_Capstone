@@ -19,9 +19,11 @@ urlpatterns = [
 
     # path for logout
 
-    path(route='', view=views.get_dealerships, name='index'),
-    path(route='dealers_in_state/<state>/', view=views.get_dealerships_by_state, name='dealers_in_state'),
+    path(route='', view=views.index, name='index'),
+    path(route='dealers', view=views.get_dealerships, name='dealers'),
+    path(route='dealers/<state>/', view=views.get_dealerships_by_state, name='dealers_in_state'),
     path(route='dealer/<int:dealer_id>/', view=views.get_dealer_details, name='dealer'),
+    path(route='review_dealer/<int:dealer_id>/', view=views.add_review, name='review_dealer'),
     path(route='about', view=views.about, name='about'),
     path(route='contact', view=views.contact, name='contact'),
     path(route='login', view=views.login_request, name='login_request'),

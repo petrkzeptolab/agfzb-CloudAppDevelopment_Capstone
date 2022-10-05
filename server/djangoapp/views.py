@@ -9,6 +9,7 @@ from datetime import datetime
 from .restapis import *
 import logging
 import json
+import random
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -16,6 +17,10 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 
+def index(request):
+    context = {}
+    if request.method == "GET":
+        return render(request, 'djangoapp/index.html', context)
 
 # Create an `about` view to render a static about page
 def about(request):
@@ -106,6 +111,22 @@ def get_dealer_details(request, dealer_id):
         return HttpResponse(dealer_names)
 
 # Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id):
+    url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/ololorg_djangoserver-space/dealership-package/post-review.json"
+    if (request.user) :
+        review = dict()
+        review["id"] = random.randint(1000, 999999)
+        review["name"] = "Upkar Lidder"
+        review["dealership"] = dealer_id
+        review["review"] = "This is a great car dealer"
+        review["purchase"] = False
+        review["time"] = datetime.utcnow().isoformat()
+        
+        json_payload = dict()
+        json_payload["review"] = review
+
+        result = post_request(url, json_payload)
+        return HttpResponse(result)
+    else :
+        return HttpResponse("not_logined")
 
