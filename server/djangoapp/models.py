@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 
-
+ 
 # Create your models here.
 
 # <HINT> Create a Car Make model `class CarMake(models.Model)`:
@@ -47,10 +47,10 @@ class CarModel(models.Model):
     )
     
     def __str__(self):
-        return "{carMake: " + self.carMake + "," + \
+        return "{carMake: " + str(self.carMake) + "," + \
                "name: " + self.name + \
-               "dealerid: " + self.dealerid + \
-               "year: " + self.year + \
+               "dealerid: " + str(self.dealerid) + \
+               "year: " + str(self.year) + \
                "modelType: " + self.modelType + \
                "}"
 
@@ -82,7 +82,7 @@ class CarDealer:
 
 # <HINT> Create a plain Python class `DealerReview` to hold review data
 class DealerReview:
-    def __init__(self, car_make, car_model, car_year, dealership, name, purchase, purchase_date, review, sentiment):
+    def __init__(self, car_make, car_model, car_year, dealership, name, purchase, purchase_date, review, time, sentiment):
         self.car_make = car_make
         self.car_model = car_model
         self.car_year = car_year
@@ -91,6 +91,7 @@ class DealerReview:
         self.purchase = purchase
         self.purchase_date = purchase_date
         self.review = review
+        self.time = time
         self.sentiment = sentiment
 
     def __str__(self):

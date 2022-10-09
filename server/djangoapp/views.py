@@ -81,12 +81,13 @@ def register(request):
 def get_dealerships(request):
     if request.method == "GET":
         url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/ololorg_djangoserver-space/dealership-package/get-dealership.json"
-        # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        context = {} 
+        context["dealerships"] = dealerships
+        return render(request, 'djangoapp/index.html', context)
+        
+        # dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # return HttpResponse(dealer_names)
 
 def get_dealerships_by_state(request, state):
     if request.method == "GET":
@@ -103,30 +104,41 @@ def get_dealerships_by_state(request, state):
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
         url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/ololorg_djangoserver-space/dealership-package/get-review.json"
-        # Get dealers from the URL
-        dealerships = get_dealer_reviews_from_cf(url, dealer_id)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.__str__() for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        reviews = get_dealer_reviews_from_cf(url, dealer_id)
+        context = {}
+        context["dealer_id"] = dealer_id
+        context["reviews"] = reviews
+        return render(request, 'djangoapp/dealer_details.html', context)
+        # review_str = ' '.join([dealer.__str__() for review in reviews])
+        # return HttpResponse(review_str)
 
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
-    url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/ololorg_djangoserver-space/dealership-package/post-review.json"
-    if (request.user) :
-        review = dict()
-        review["id"] = random.randint(1000, 999999)
-        review["name"] = "Upkar Lidder"
-        review["dealership"] = dealer_id
-        review["review"] = "This is a great car dealer"
-        review["purchase"] = False
-        review["time"] = datetime.utcnow().isoformat()
-        
-        json_payload = dict()
-        json_payload["review"] = review
+    if request.method == "POST":
+        if (request.user) :
+            print(request.POST)
+            url = "https://eu-gb.functions.appdomain.cloud/api/v1/web/ololorg_djangoserver-space/dealership-package/post-review.json"
+            review = dict()
+            review["id"] = random.randint(1000, 999999)
+            review["name"] = request.POST['name']
+            review["dealership"] = dealer_id
+            review["review"] = request.POST['content']
+            review["purchase"] = request.POST.get('purchasecheck', False)
+            review["time"] = datetime.utcnow().isoformat()
+            
+            json_payload = dict()
+            json_payload["review"] = review
 
-        result = post_request(url, json_payload)
-        return HttpResponse(result)
+            result = post_request(url, json_payload)
+            return redirect("djangoapp:dealer", dealer_id=dealer_id)
+        else :
+            return HttpResponse("not_logined")
     else :
-        return HttpResponse("not_logined")
+        context = {}
+        context["dealer_id"] = dealer_id
+        context["cars"] = []
+        for car in CarModel.objects.filter():
+            context["cars"].append(car)
+                
+        return render(request, 'djangoapp/add_review.html', context)
 

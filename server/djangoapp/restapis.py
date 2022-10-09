@@ -97,7 +97,7 @@ def get_dealer_reviews_from_cf(url, dealer_id):
     # Call get_request with a URL parameter
     json_result = get_request(url, dealerId=dealer_id)
     print(json_result)
-    if json_result:
+    if json_result and "reviews" in json_result:
         reviews_docs = json_result["reviews"]
         for review_doc in reviews_docs:
             review_obj = DealerReview(car_make=review_doc.get("car_make", ""),
@@ -108,6 +108,7 @@ def get_dealer_reviews_from_cf(url, dealer_id):
                 purchase=review_doc.get("purchase", ""),
                 purchase_date=review_doc.get("purchase_date", ""),
                 review=review_doc.get("review", ""),
+                time=review_doc.get("time", ""),
                 sentiment=analyze_review_sentiments(review_doc.get("review", "")))
             results.append(review_obj)
 
@@ -133,9 +134,13 @@ def analyze_review_sentiments(text):
         # If any error occurs
         print("Network exception occurred")
     status_code = response.status_code
-    print("With status {} ".format(status_code))
-    json_data = json.loads(response.text)
-    return json_data["keywords"][0]["sentiment"]["label"]
+    if (status_code == 200) :
+        print("With status {} \'{}\'".format(status_code, response.text))
+        json_data = json.loads(response.text)
+        return json_data["keywords"][0]["sentiment"]["label"]
+    else :
+        return ""
+        
  
 # - Call get_request() with specified arguments
 # - Get the returned sentiment label such as Positive or Negative
